@@ -8,6 +8,8 @@ from browser_use.controller.service import Controller
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr, BaseModel
+from dotenv import load_dotenv
+
 
 class CheckoutResult(BaseModel):
     login_status: str
@@ -44,9 +46,16 @@ async def cart_validation():
         'checkout and select country, agree terms and purchase '
         'verify thankyou message is displayed'
     )
-    api_key = os.environ["GEMINI_API_KEY"] = 'AIzaSyC5R_gZjODWdflMZmIm3P18zgyhs0ASLVI'
-    #api_key = os.environ["OPENAI_API_KEY"] = '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'
-    llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-exp-image-generation',api_key= SecretStr(api_key))
+    load_dotenv(dotenv_path='C:/Users/XW334BQ/PycharmProjects/AITestAutomation/test.env')
+    print("GEMINI_API_KEY : ", os.environ.get("GEMINI_API_KEY"))
+    api_key = os.environ.get("GEMINI_API_KEY")
+
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is not set in the environment variables")
+
+    llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-exp-image-generation', api_key=SecretStr(api_key))
+    # api_key = os.environ.get("GEMINI_API_KEY")
+    #llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-exp-image-generation',api_key= SecretStr(api_key))
     #llm = ChatOpenAI(model = 'omni-moderation-2024-09-26',api_key= SecretStr(api_key))
     agent = Agent(task=task,controller=controller,llm=llm,use_vision=True)
     history = await agent.run()
